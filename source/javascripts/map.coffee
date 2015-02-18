@@ -74,6 +74,16 @@ featureLayer = L.mapbox.featureLayer()
       featureLayer.eachLayer (layer) ->
         html = "#{layer.feature.properties.name}<br/><p>Freie Plätze: #{layer.feature.properties.free}"
         layer.bindPopup(html)
+        statusColor = '#E83838'
+        if layer.feature.properties.status == "frei"
+          statusColor = '#6CBA5B'
+        if layer instanceof L.Marker
+          layer.setIcon L.mapbox.marker.icon
+            'marker-color': statusColor
+        else
+          layer.setStyle
+            fillColor: statusColor
+        return
     )
 
 findMeLayer = L.mapbox.featureLayer().addTo(map)
