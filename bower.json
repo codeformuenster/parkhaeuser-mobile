@@ -1,0 +1,20 @@
+{
+  "name": "parkhaueser-mobile",
+  "version": "0.0.0",
+  "authors": [
+    "Mila Frerichs <mila.frerichs@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies" : {
+    "mapbox.js":"",
+    "turf":""
+  }
+}
