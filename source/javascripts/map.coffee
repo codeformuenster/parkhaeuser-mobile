@@ -62,8 +62,11 @@ map = L.mapbox.map('map', 'examples.map-i86nkdio')
 featureLayer = L.mapbox.featureLayer()
     .loadURL('http://parkleit-api.codeformuenster.org/')
     .addTo(map)
-    .on('layeradd', (e) ->
+    .on('ready', (e) ->
       parkhaueser = this.getGeoJSON()
+      featureLayer.eachLayer (layer) ->
+        html = "#{layer.feature.properties.name}<br/><p>Freie Plätze: #{layer.feature.properties.free}"
+        layer.bindPopup(html)
     )
 
 findMeLayer = L.mapbox.featureLayer().addTo(map)
