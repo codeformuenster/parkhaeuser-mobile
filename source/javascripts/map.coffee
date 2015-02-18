@@ -19,9 +19,16 @@ nearest = (targetPoint, features) ->
   return nearestPoint
 
 highlightNearest = (nearest) ->
-  nearest.properties['marker-color'] = '#f00'
-  nearest.properties['fill'] = '#f00'
-  nearest.properties['stroke'] = '#f00'
+  highlightColor = "#f00"
+  featureLayer.eachLayer (layer) ->
+    if layer.feature == nearest
+      if layer instanceof L.Marker
+        layer.setIcon L.mapbox.marker.icon
+          'stroke': highlightColor
+      else
+        layer.setStyle
+          color: highlightColor
+      return
 
 createFeatureForNearestAndUserLocation = (userLocation, nearest, layer) ->
   layer.setGeoJSON
@@ -70,7 +77,7 @@ featureLayer = L.mapbox.featureLayer()
     )
 
 findMeLayer = L.mapbox.featureLayer().addTo(map)
-nearestLayer = L.mapbox.featureLayer().addTo(map)
+nearestLayer = L.mapbox.featureLayer()
 
 
 if !navigator.geolocation
