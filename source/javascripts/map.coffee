@@ -1,6 +1,23 @@
 parkhaueser = ''
 L.mapbox.accessToken = 'pk.eyJ1IjoiY29kZWZvcm11ZW5zdGVyIiwiYSI6IldYQkVOencifQ.siqN1k-DBUe2A7KkV1NHEA'
 
+nearest = (targetPoint, features) ->
+  nearestPoint = null
+  count = 0
+  dist = Infinity
+  features.features.forEach (pt) ->
+    if !nearestPoint
+      nearestPoint = pt
+      dist = turf.distance(targetPoint, turf.pointOnSurface(pt), 'miles')
+      nearestPoint.properties.distance = dist
+    else
+      dist = turf.distance(targetPoint, turf.pointOnSurface(pt), 'miles')
+      if dist < nearestPoint.properties.distance
+        nearestPoint = pt
+        nearestPoint.properties.distance = dist
+  delete nearestPoint.properties.distance
+  return nearestPoint
+
 highlightNearest = (nearest) ->
   nearest.properties['marker-color'] = '#f00'
   nearest.properties['fill'] = '#f00'
@@ -16,7 +33,7 @@ centerLayer = (layer) ->
   map.fitBounds(layer.getBounds())
 
 findNearest = (search, searchIn) ->
-  turf.nearest(search, searchIn)
+  nearest(search, searchIn)
 
 findUser = ->
   map.locate()
