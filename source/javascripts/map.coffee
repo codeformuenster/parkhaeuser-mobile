@@ -22,16 +22,17 @@ nearest = (targetPoint, features) ->
   return nearestPoint
 
 highlightNearest = (nearest) ->
-  highlightColor = "#f00"
+  highlightColor = "#1AA3E5"
   featureLayer.eachLayer (layer) ->
     if layer.feature == nearest
       if layer instanceof L.Marker
         layer.setIcon L.mapbox.marker.icon
-          'stroke': highlightColor
+          'marker-color': highlightColor
+        return
       else
         layer.setStyle
           color: highlightColor
-      return
+        return
 
 createFeatureForNearestAndUserLocation = (userLocation, nearest, layer) ->
   layer.setGeoJSON
