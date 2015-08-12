@@ -1,25 +1,30 @@
 (function() {
-  var centerLayer, createFeatureForNearestAndUserLocation, featureLayer, findMeLayer, findNearest, findUser, highlightNearest, map, nearest, nearestLayer, parkhaueser;
+  var centerLayer, createFeatureForNearestAndUserLocation, featureLayer, findMeLayer, findNearest, findUser, highlightNearest, map, nearest, nearestLayer, parkhaueser, parkhaus_frei;
 
   parkhaueser = '';
 
   L.mapbox.accessToken = 'pk.eyJ1IjoiY29kZWZvcm11ZW5zdGVyIiwiYSI6IldYQkVOencifQ.siqN1k-DBUe2A7KkV1NHEA';
 
+  parkhaus_frei = function(feature) {
+    return feature.properties.free > 0;
+  };
+
   nearest = function(targetPoint, features) {
-    var count, dist, nearestPoint;
+    var dist, nearestPoint;
     nearestPoint = null;
-    count = 0;
     dist = Infinity;
     features.features.forEach(function(pt) {
-      if (!nearestPoint) {
-        nearestPoint = pt;
-        dist = turf.distance(targetPoint, turf.pointOnSurface(pt), 'miles');
-        return nearestPoint.properties.distance = dist;
-      } else {
-        dist = turf.distance(targetPoint, turf.pointOnSurface(pt), 'miles');
-        if (dist < nearestPoint.properties.distance) {
+      if (parkhaus_frei(pt)) {
+        if (!nearestPoint) {
           nearestPoint = pt;
+          dist = turf.distance(targetPoint, turf.pointOnSurface(pt), 'miles');
           return nearestPoint.properties.distance = dist;
+        } else {
+          dist = turf.distance(targetPoint, turf.pointOnSurface(pt), 'miles');
+          if (dist < nearestPoint.properties.distance) {
+            nearestPoint = pt;
+            return nearestPoint.properties.distance = dist;
+          }
         }
       }
     });
@@ -28,9 +33,21 @@
   };
 
   highlightNearest = function(nearest) {
-    nearest.properties['marker-color'] = '#f00';
-    nearest.properties['fill'] = '#f00';
-    return nearest.properties['stroke'] = '#f00';
+    var highlightColor;
+    highlightColor = "#1AA3E5";
+    return featureLayer.eachLayer(function(layer) {
+      if (layer.feature === nearest) {
+        if (layer instanceof L.Marker) {
+          layer.setIcon(L.mapbox.marker.icon({
+            'marker-color': highlightColor
+          }));
+        } else {
+          layer.setStyle({
+            color: highlightColor
+          });
+        }
+      }
+    });
   };
 
   createFeatureForNearestAndUserLocation = function(userLocation, nearest, layer) {
@@ -74,13 +91,31 @@
 
   map = L.mapbox.map('map', 'codeformuenster.n5di3b77').setView([51.959, 7.626], 15);
 
-  featureLayer = L.mapbox.featureLayer().loadURL('http://parkleit-api.codeformuenster.org').addTo(map).on('layeradd', function(e) {
-    return parkhaueser = this.getGeoJSON();
+  featureLayer = L.mapbox.featureLayer().loadURL('http://parkleit-api.codeformuenster.org').addTo(map).on('ready', function(e) {
+    parkhaueser = this.getGeoJSON();
+    return featureLayer.eachLayer(function(layer) {
+      var html, statusColor;
+      html = layer.feature.properties.name + "<br/><p>Freie Plätze: " + layer.feature.properties.free;
+      layer.bindPopup(html);
+      statusColor = '#E83838';
+      if (parkhaus_frei(layer.feature)) {
+        statusColor = '#6CBA5B';
+      }
+      if (layer instanceof L.Marker) {
+        layer.setIcon(L.mapbox.marker.icon({
+          'marker-color': statusColor
+        }));
+      } else {
+        layer.setStyle({
+          fillColor: statusColor
+        });
+      }
+    });
   });
 
   findMeLayer = L.mapbox.featureLayer().addTo(map);
 
-  nearestLayer = L.mapbox.featureLayer().addTo(map);
+  nearestLayer = L.mapbox.featureLayer();
 
   if (!navigator.geolocation) {
     geolocate.innerHTML = 'Geolocation is not available';
