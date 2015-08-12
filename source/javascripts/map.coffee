@@ -57,10 +57,10 @@ findUser = ->
     return
   return
 
-map = L.mapbox.map('map', 'codeformuenster.ino9j865')
+map = L.mapbox.map('map', 'codeformuenster.n5di3b77')
     .setView([51.959,7.626], 15)
 featureLayer = L.mapbox.featureLayer()
-    .loadURL('http://parkleit-api.codeformuenster.org/')
+    .loadURL('http://parkleit-api.codeformuenster.org')
     .addTo(map)
     .on('layeradd', (e) ->
       parkhaueser = this.getGeoJSON()
