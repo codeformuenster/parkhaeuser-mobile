@@ -2,7 +2,7 @@ parkhaueser = ''
 L.mapbox.accessToken = 'pk.eyJ1IjoiY29kZWZvcm11ZW5zdGVyIiwiYSI6IldYQkVOencifQ.siqN1k-DBUe2A7KkV1NHEA'
 
 parkhaus_frei = (feature) ->
-  feature.properties.status == "frei"
+  feature.properties.free > 0
 
 nearest = (targetPoint, features) ->
   nearestPoint = null
