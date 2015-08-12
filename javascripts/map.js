@@ -28,21 +28,9 @@
   };
 
   highlightNearest = function(nearest) {
-    var highlightColor;
-    highlightColor = "#f00";
-    return featureLayer.eachLayer(function(layer) {
-      if (layer.feature === nearest) {
-        if (layer instanceof L.Marker) {
-          layer.setIcon(L.mapbox.marker.icon({
-            'stroke': highlightColor
-          }));
-        } else {
-          layer.setStyle({
-            color: highlightColor
-          });
-        }
-      }
-    });
+    nearest.properties['marker-color'] = '#f00';
+    nearest.properties['fill'] = '#f00';
+    return nearest.properties['stroke'] = '#f00';
   };
 
   createFeatureForNearestAndUserLocation = function(userLocation, nearest, layer) {
@@ -84,33 +72,15 @@
     });
   };
 
-  map = L.mapbox.map('map', 'examples.map-i86nkdio').setView([51.959, 7.626], 15);
+  map = L.mapbox.map('map', 'codeformuenster.ino9j865').setView([51.959, 7.626], 15);
 
-  featureLayer = L.mapbox.featureLayer().loadURL('http://parkleit-api.codeformuenster.org/').addTo(map).on('ready', function(e) {
-    parkhaueser = this.getGeoJSON();
-    return featureLayer.eachLayer(function(layer) {
-      var html, statusColor;
-      html = layer.feature.properties.name + "<br/><p>Freie Plätze: " + layer.feature.properties.free;
-      layer.bindPopup(html);
-      statusColor = '#E83838';
-      if (layer.feature.properties.status === "frei") {
-        statusColor = '#6CBA5B';
-      }
-      if (layer instanceof L.Marker) {
-        layer.setIcon(L.mapbox.marker.icon({
-          'marker-color': statusColor
-        }));
-      } else {
-        layer.setStyle({
-          fillColor: statusColor
-        });
-      }
-    });
+  featureLayer = L.mapbox.featureLayer().loadURL('http://parkleit-api.codeformuenster.org/').addTo(map).on('layeradd', function(e) {
+    return parkhaueser = this.getGeoJSON();
   });
 
   findMeLayer = L.mapbox.featureLayer().addTo(map);
 
-  nearestLayer = L.mapbox.featureLayer();
+  nearestLayer = L.mapbox.featureLayer().addTo(map);
 
   if (!navigator.geolocation) {
     geolocate.innerHTML = 'Geolocation is not available';
