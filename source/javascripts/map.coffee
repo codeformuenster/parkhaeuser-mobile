@@ -57,7 +57,7 @@ findUser = ->
     return
   return
 
-map = L.mapbox.map('map', 'examples.map-i86nkdio')
+map = L.mapbox.map('map', 'codeformuenster.ino9j865')
     .setView([51.959,7.626], 15)
 featureLayer = L.mapbox.featureLayer()
     .loadURL('http://parkleit-api.codeformuenster.org/')
