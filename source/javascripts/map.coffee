@@ -1,27 +1,38 @@
 parkhaueser = ''
 L.mapbox.accessToken = 'pk.eyJ1IjoiY29kZWZvcm11ZW5zdGVyIiwiYSI6IldYQkVOencifQ.siqN1k-DBUe2A7KkV1NHEA'
 
+parkhaus_frei = (feature) ->
+  feature.properties.status == "frei"
+
 nearest = (targetPoint, features) ->
   nearestPoint = null
-  count = 0
   dist = Infinity
   features.features.forEach (pt) ->
-    if !nearestPoint
-      nearestPoint = pt
-      dist = turf.distance(targetPoint, turf.pointOnSurface(pt), 'miles')
-      nearestPoint.properties.distance = dist
-    else
-      dist = turf.distance(targetPoint, turf.pointOnSurface(pt), 'miles')
-      if dist < nearestPoint.properties.distance
+    if parkhaus_frei(pt)
+      if !nearestPoint
         nearestPoint = pt
+        dist = turf.distance(targetPoint, turf.pointOnSurface(pt), 'miles')
         nearestPoint.properties.distance = dist
+      else
+        dist = turf.distance(targetPoint, turf.pointOnSurface(pt), 'miles')
+        if dist < nearestPoint.properties.distance
+          nearestPoint = pt
+          nearestPoint.properties.distance = dist
   delete nearestPoint.properties.distance
   return nearestPoint
 
 highlightNearest = (nearest) ->
-  nearest.properties['marker-color'] = '#f00'
-  nearest.properties['fill'] = '#f00'
-  nearest.properties['stroke'] = '#f00'
+  highlightColor = "#1AA3E5"
+  featureLayer.eachLayer (layer) ->
+    if layer.feature == nearest
+      if layer instanceof L.Marker
+        layer.setIcon L.mapbox.marker.icon
+          'marker-color': highlightColor
+        return
+      else
+        layer.setStyle
+          color: highlightColor
+        return
 
 createFeatureForNearestAndUserLocation = (userLocation, nearest, layer) ->
   layer.setGeoJSON
@@ -62,12 +73,25 @@ map = L.mapbox.map('map', 'codeformuenster.n5di3b77')
 featureLayer = L.mapbox.featureLayer()
     .loadURL('http://parkleit-api.codeformuenster.org')
     .addTo(map)
-    .on('layeradd', (e) ->
+    .on('ready', (e) ->
       parkhaueser = this.getGeoJSON()
+      featureLayer.eachLayer (layer) ->
+        html = "#{layer.feature.properties.name}<br/><p>Freie Plätze: #{layer.feature.properties.free}"
+        layer.bindPopup(html)
+        statusColor = '#E83838'
+        if parkhaus_frei(layer.feature)
+          statusColor = '#6CBA5B'
+        if layer instanceof L.Marker
+          layer.setIcon L.mapbox.marker.icon
+            'marker-color': statusColor
+        else
+          layer.setStyle
+            fillColor: statusColor
+        return
     )
 
 findMeLayer = L.mapbox.featureLayer().addTo(map)
-nearestLayer = L.mapbox.featureLayer().addTo(map)
+nearestLayer = L.mapbox.featureLayer()
 
 
 if !navigator.geolocation
